@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информатика: Жанболаттың Тест Платформасы</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --text: #1e293b;
+            --card: #ffffff;
+            --error: #ef4444;
+            --success: #059669;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        /* Сәлемдеме экраны */
+        #welcome-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--primary); color: white; display: flex;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 2000; text-align: center; padding: 20px;
+        }
+        #welcome-screen input {
+            padding: 15px; font-size: 1.2em; border-radius: 8px; border: none;
+            margin-top: 20px; width: 300px; outline: none;
+        }
+        #start-btn {
+            margin-top: 20px; padding: 15px 40px; background: #059669;
+            color: white; border: none; border-radius: 8px; font-size: 1.2em;
+            cursor: pointer; transition: 0.3s;
+        }
+
+        header { text-align: center; margin-bottom: 40px; background: var(--primary); color: white; padding: 30px; border-radius: 15px; }
+        .section-title { background: #e2e8f0; padding: 12px 20px; border-radius: 8px; margin-top: 50px; font-weight: bold; border-left: 6px solid var(--primary); font-size: 1.2em; }
+        .quiz-card { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 2px solid transparent; }
+        .question-text { font-size: 1.1em; font-weight: 600; margin-bottom: 15px; }
+        .options { display: grid; gap: 10px; }
+        .option { display: flex; align-items: center; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; }
+        
+        /* Нәтиже көрсеткіш - Фиксацияланған */
+        #result-box { 
+            display: none; position: fixed; top: 0; left: 50%; 
+            transform: translateX(-50%); width: 90%; max-width: 600px;
+            background: white; z-index: 1500; padding: 20px;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 3px solid var(--primary);
+            text-align: center;
+        }
+        .score { font-size: 2.5em; font-weight: 800; color: var(--primary); margin: 5px 0; }
+        
+        .correct-card { border-color: var(--success) !important; background-color: #f0fdf4; }
+        .wrong-card { border-color: var(--error) !important; background-color: #fef2f2; }
+        .feedback-text { margin-top: 10px; font-weight: bold; }
+        .wrong-text { color: var(--error); }
+        .correct-text { color: var(--success); }
+
+        #submit-btn { width: 100%; padding: 20px; background: #059669; color: white; border: none; border-radius: 10px; font-size: 1.3em; font-weight: bold; cursor: pointer; margin: 40px 0 100px 0; }
+    </style>
+</head>
+<body>
+
+<div id="welcome-screen">
+    <h1>Жанболаттың тестіне қош келдіңіз!</h1>
+    <p>Жалғастыру үшін есіміңізді жазыңыз:</p>
+    <input type="text" id="userName" placeholder="Сіздің атыңыз...">
+    <button id="start-btn" onclick="startQuiz()">Жалғастыру</button>
+</div>
+
+<div class="container">
+    <header>
+        <h1 id="userGreeting">Информатикадан жиынтық тест</h1>
+        <p>7 тақырып, 75 сұрақ. Сәттілік!</p>
+    </header>
+
+    <div id="result-box">
+        <h2 id="resultName">Тест нәтижесі</h2>
+        <div class="score" id="finalScore">0 / 75</div>
+        <p id="feedback"></p>
+        <button onclick="location.reload()" style="padding: 10px 20px; cursor:pointer;">Қайта тапсыру</button>
+        <p style="font-size: 0.8em; color: gray;">Қателерді төменнен көре аласыз</p>
+    </div>
+
+    <form id="megaQuiz">
+        <div class="section-title">1. Ақпарат сипаты және қасиеті</div>
+        <div id="section1"></div>
+        <div class="section-title">2. Компьютер конфигурациясы</div>
+        <div id="section2"></div>
+        <div class="section-title">3. Электронды кестелер (Excel)</div>
+        <div id="section3"></div>
+        <div class="section-title">4. Бағдарламалық жасақтама</div>
+        <div id="section4"></div>
+        <div class="section-title">5. Желінің өткізу қабілеті</div>
+        <div id="section5"></div>
+        <div class="section-title">6. Компьютерлік желілер</div>
+        <div id="section6"></div>
+        <div class="section-title">7. DNS және домендер</div>
+        <div id="section7"></div>
+        <button type="button" id="submit-btn" onclick="calculateScore()">Тестті аяқтау</button>
+    </form>
+</div>
+
+<script>
+    const quizData = [
+        // ТАҚЫРЫП 1-7 деректеріңіз осында...
+        { s: 1, q: "Ақпараттың қазіргі уақытқа сәйкес келу қасиеті қалай аталады?", o: ["Толықтығы", "Өзектілігі (айқындылығы)", "Түсініктілігі", "Қолжетімділігі"], a: 1 },
+        { s: 1, q: "Ақпараттың шынайы жағдайды бейнелеуі және оның дұрыстығы қай қасиетке жатады?", o: ["Объективтілігі", "Құндылығы", "Анықтылығы (сенімділігі)", "Қысқалығы"], a: 2 },
+        { s: 1, q: "Шешім қабылдауға жеткілікті ақпараттың жиынтығы қалай аталады?", o: ["Толықтығы", "Объективтілігі", "Түсініктілігі", "Бағалылығы"], a: 0 },
+        { s: 1, q: "Ақпараттың адамның жеке пікіріне немесе сезіміне тәуелсіз болуы:", o: ["Анықтылығы", "Объективтілігі", "Өзектілігі", "Түсініктілігі"], a: 1 },
+        { s: 1, q: "Ақпараттың маңызды мәселені шешуге тигізетін пайдасы қай қасиетті сипаттайды?", o: ["Қолжетімділігі", "Құндылығы (бағалылығы)", "Толықтығы", "Анықтылығы"], a: 1 },
+        { s: 1, q: "Егер ақпарат қабылдаушыға белгілі тілде жеткізілсе, бұл қай қасиеттің орындалғаны?", o: ["Өзектілігі", "Түсініктілігі", "Объективтілігі", "Қысқалығы"], a: 1 },
+        { s: 1, q: "Ақпаратты қабылдау тәсіліне қарай қандай түрлерге бөлінеді?", o: ["Мәтіндік, сандық, графиктік", "Көру, есту, иіскеу, дәм сезу, сипап сезу", "Ғылыми, қоғамдық, техникалық", "Аналогтық және цифрлық"], a: 1 },
+        { s: 1, q: "Математикалық формулалар арқылы берілген ақпараттың түрі қандай?", o: ["Мәтіндік", "Дыбыстық", "Сандық", "Видеоақпарат"], a: 2 },
+        { s: 1, q: "Ақпараттың мазмұнында артық сөздің болмауы және нақтылығы қай сипатқа жатады?", o: ["Қысқалығы", "Қолжетімділігі", "Түсініктілігі", "Толықтығы"], a: 0 },
+        { s: 1, q: "Ақпаратты алу мүмкіндігі мен оны пайдалану еркіндігі қалай аталады?", o: ["Құндылығы", "Қолжетімділігі", "Объективтілігі", "Өзектілігі"], a: 1 },
+        // ... (Қалған сұрақтарды осында қалдырыңыз)
+        { s: 2, q: "Процессордың жылдамдығы қандай бірлікпен өлшенеді?", o: ["Байт", "Герц", "Пиксель"], a: 1 },
+        { s: 2, q: "Ақпаратты тұрақты сақтауға арналған ең жылдам құрылғы:", o: ["RAM", "SSD", "HDD"], a: 1 },
+        { s: 2, q: "Компьютердің конфигурациясы дегеніміз не?", o: ["Тек монитордың түсі", "Орнатылған ойындардың тізімі", "Жүйелік блоктың ішіндегі құрылғылар"], a: 2 },
+        { s: 2, q: "Процессордың бір уақытта орындай алатын есептеулер санын не анықтайды?", o: ["Ядро саны", "Диск көлемі", "Монитордың диагоналі"], a: 0 },
+        { s: 2, q: "Бейнекартаның (GPU) негізгі міндеті:", o: ["Дыбыс шығару", "Экрандағы кескіндер мен графиканы өңдеу", "Мәтін теру"], a: 1 },
+        { s: 2, q: "Компьютердің қуат алуын және кернеуді реттейтін құрылғы:", o: ["Кулер", "Қорек блогы (Power Supply)", "Процессор"], a: 1 },
+        { s: 2, q: "Процессорды қызып кетуден қорғайтын салқындату жүйесі:", o: ["Кулер (желдеткіш)", "Модем", "Сканер"], a: 0 },
+        { s: 2, q: "Компьютер өшкенде ішіндегі ақпарат жойылып кететін жады түрі:", o: ["Қатқыл диск", "Жедел жады (RAM)", "Флешка"], a: 1 },
+        { s: 2, q: "Қазіргі кездегі жедел жадының (RAM) стандарты:", o: ["DDR4 / DDR5", "HDD / SSD", "MP3 / MP4"], a: 0 },
+        { s: 2, q: "Компьютердің өнімділігіне (жылдамдығына) ең көп әсер ететін жабдық:", o: ["Монитор", "Процессор", "Принтер"], a: 1 },
+        // Excel
+        { s: 3, q: "Электрондық кестенің ең кіші элементі қалай аталады?", o: ["Баған", "Жол", "Ұяшық"], a: 2 },
+        { s: 3, q: "Кестедегі бағандар қалай белгіленеді?", o: ["Сандармен", "Латын әріптерімен", "Белгілермен"], a: 1 },
+        { s: 3, q: "Ұяшықтың адресі қалай жазылады?", o: ["B5", "10", "D"], a: 0 },
+        { s: 3, q: "Электрондық кестеде формула қай таңбадан басталады?", o: ["+", "=", "("], a: 1 },
+        { s: 3, q: "Бірнеше ұяшықтар жиынтығы:", o: ["Диапазон", "Кесте", "Жол"], a: 0 },
+        { s: 3, q: "MS Excel файлының кеңейтілімі:", o: [".docx", ".xlsx", ".pptx"], a: 1 },
+        { s: 3, q: "Қосындыны есептейтін функция:", o: ["AVERAGE", "MIN", "SUM"], a: 2 },
+        { s: 3, q: "Кестедегі жолдар қалай белгіленеді?", o: ["Әріптермен", "Сандармен", "Түстермен"], a: 1 },
+        { s: 3, q: "Көрнекі бейнелеу үшін не қолданылады?", o: ["Диаграмма", "Сызғыш", "Мәтін"], a: 0 },
+        { s: 3, q: "«####» белгісі нені білдіреді?", o: ["Қате", "Бос", "Сан сыймай тұр"], a: 2 },
+        // (Басқа сұрақтарды да осылай қосуға болады, формат сақталған)
+        { s: 4, q: "Драйвер дегеніміз не?", o: ["Ойын", "Құрылғыны басқару бағдарламасы", "Вирус"], a: 1 },
+        { s: 5, q: "Өткізу қабілетінің өлшем бірлігі:", o: ["бит/с", "Гбайт", "Бод"], a: 0 },
+        { s: 6, q: "LAN дегеніміз не?", o: ["Жергілікті желі", "Ғаламдық желі", "Сымсыз желі"], a: 0 },
+        { s: 7, q: "DNS қызметі:", o: ["Файл жүктеу", "Доменді IP-ге айналдыру", "Қорғаныс"], a: 1 }
+    ];
+
+    function startQuiz() {
+        const name = document.getElementById('userName').value;
+        if (name.trim() === "") {
+            alert("Өтінемін, есіміңізді жазыңыз!");
+            return;
+        }
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('userGreeting').innerText = `Сәттілік, ${name}!`;
+    }
+
+    function loadQuiz() {
+        quizData.forEach((item, index) => {
+            const section = document.getElementById('section' + item.s);
+            if (!section) return;
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+            card.id = `card-${index}`;
+            let optionsHTML = '';
+            item.o.forEach((opt, i) => {
+                optionsHTML += `<label class="option"><input type="radio" name="q${index}" value="${i}"> ${opt}</label>`;
+            });
+            card.innerHTML = `<div class="question-text">${index + 1}. ${item.q}</div><div class="options">${optionsHTML}</div><div id="feedback-${index}" class="feedback-text"></div>`;
+            section.appendChild(card);
+        });
+    }
+
+    function calculateScore() {
+        let score = 0;
+        const total = quizData.length;
+        const name = document.getElementById('userName').value;
+        
+        quizData.forEach((item, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const card = document.getElementById(`card-${index}`);
+            const fb = document.getElementById(`feedback-${index}`);
+            card.classList.remove('correct-card', 'wrong-card');
+            
+            if (selected) {
+                if (parseInt(selected.value) === item.a) {
+                    score++;
+                    card.classList.add('correct-card');
+                    fb.innerHTML = "✓ Дұрыс"; fb.className = "feedback-text correct-text";
+                } else {
+                    card.classList.add('wrong-card');
+                    fb.innerHTML = `✗ Қате. Дұрыс жауап: ${item.o[item.a]}`; fb.className = "feedback-text wrong-text";
+                }
+            } else {
+                card.classList.add('wrong-card');
+                fb.innerHTML = `⚠ Жауап берілмеді. Дұрыс: ${item.o[item.a]}`; fb.className = "feedback-text wrong-text";
+            }
+        });
+
+        const resBox = document.getElementById('result-box');
+        resBox.style.display = 'block';
+        document.getElementById('resultName').innerText = `${name}, сіздің нәтижеңіз:`;
+        document.getElementById('finalScore').innerText = `${score} / ${total}`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.onload = loadQuiz;
+</script>
+
+</body>
+</html>
